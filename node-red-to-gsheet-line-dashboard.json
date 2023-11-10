@@ -1,0 +1,1048 @@
+[
+    {
+        "id": "02e15995c820aa57",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "daa59f4b00bcb125",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Convert data to % and set to flow variable",
+        "func": "var data = msg.payload.data;\n\ndata =  data / 10;\nmsg.payload = data;\nflow.set(\"humidity\", data)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 160,
+        "wires": [
+            [
+                "6b3457b7228c741d"
+            ]
+        ]
+    },
+    {
+        "id": "0baeb35bd2bcfd4c",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Convert data to °C and set to flow variable",
+        "func": " var data = msg.payload.data;\n\ndata =  data / 10;\nmsg.payload = data;\nflow.set(\"temperature\", data)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 220,
+        "wires": [
+            [
+                "161909f70fa16d86",
+                "edf77e86e3f559f2",
+                "c3f7c1cbf64f7296"
+            ]
+        ]
+    },
+    {
+        "id": "c1faec9f06634018",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Humidity",
+        "func": "msg.payload = { value: msg.payload, 'fc': 3, 'unitid': 1, 'address': 0 , 'quantity': 1 };\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1320,
+        "y": 160,
+        "wires": [
+            [
+                "3bc6d60ea68cab2e"
+            ]
+        ]
+    },
+    {
+        "id": "706870541f7552d0",
+        "type": "inject",
+        "z": "02e15995c820aa57",
+        "name": "Collect data every 5 minutes",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1050,
+        "y": 260,
+        "wires": [
+            [
+                "ae204bd785910b41"
+            ]
+        ]
+    },
+    {
+        "id": "2696d8e2443a9151",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Temperature",
+        "func": "msg.payload = { value: msg.payload, 'fc': 3, 'unitid': 1, 'address': 1 , 'quantity': 1 };\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1330,
+        "y": 220,
+        "wires": [
+            [
+                "a2b3dd5ea7fba9c5"
+            ]
+        ]
+    },
+    {
+        "id": "3bc6d60ea68cab2e",
+        "type": "modbus-flex-getter",
+        "z": "02e15995c820aa57",
+        "name": "Get humidity value from sensor",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "logIOActivities": false,
+        "server": "0148d8e1bbb84091",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 1590,
+        "y": 160,
+        "wires": [
+            [],
+            [
+                "daa59f4b00bcb125"
+            ]
+        ]
+    },
+    {
+        "id": "a2b3dd5ea7fba9c5",
+        "type": "modbus-flex-getter",
+        "z": "02e15995c820aa57",
+        "name": "Get temperature value from sensor",
+        "showStatusActivities": false,
+        "showErrors": true,
+        "showWarnings": false,
+        "logIOActivities": false,
+        "server": "0148d8e1bbb84091",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 1600,
+        "y": 220,
+        "wires": [
+            [],
+            [
+                "0baeb35bd2bcfd4c"
+            ]
+        ]
+    },
+    {
+        "id": "ae204bd785910b41",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Control datalogger function",
+        "func": "if (msg.topic === \"gate\") {\n    context.pass = (msg.payload === true) ? true : false;\n    return null;  // exit out early as it's just the control\n}\nif (context.pass) {\n    return msg; // if enabled pass msg\n}\nreturn null; // or drop it",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1060,
+        "y": 200,
+        "wires": [
+            [
+                "c1faec9f06634018",
+                "2696d8e2443a9151",
+                "7ecfe92c748558c5"
+            ]
+        ]
+    },
+    {
+        "id": "0e3b25143985995f",
+        "type": "ui_switch",
+        "z": "02e15995c820aa57",
+        "name": "Control datalogger switch",
+        "label": "Collect data",
+        "tooltip": "enable to start collect data",
+        "group": "68a6bdc3bb28d4ec",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "gate",
+        "topicType": "str",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": true,
+        "className": "",
+        "x": 1050,
+        "y": 140,
+        "wires": [
+            [
+                "ae204bd785910b41"
+            ]
+        ]
+    },
+    {
+        "id": "322348bbbe79bd4c",
+        "type": "GSheet",
+        "z": "02e15995c820aa57",
+        "creds": "",
+        "method": "append",
+        "action": "",
+        "sheet": "",
+        "cells": "",
+        "flatten": false,
+        "name": "Write data to Google Sheet",
+        "x": 2400,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7ecfe92c748558c5",
+        "type": "moment",
+        "z": "02e15995c820aa57",
+        "name": "",
+        "topic": "",
+        "input": "",
+        "inputType": "msg",
+        "inTz": "Asia/Bangkok",
+        "adjAmount": "7",
+        "adjType": "hours",
+        "adjDir": "add",
+        "format": "",
+        "locale": "en-GB",
+        "output": "",
+        "outputType": "msg",
+        "outTz": "Asia/Bangkok",
+        "x": 1360,
+        "y": 280,
+        "wires": [
+            [
+                "d6c38660e8b72b4c"
+            ]
+        ]
+    },
+    {
+        "id": "aa352a6f98ec4911",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Call and prepare data",
+        "func": "var temp = flow.get(\"temperature\")\nvar humid = flow.get(\"humidity\")\nvar time = flow.get(\"time\")\n\nmsg.payload = [time, temp, humid]\nmsg.cells = flow.get(\"currentSheet\") +\"!A1:B2\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2360,
+        "y": 220,
+        "wires": [
+            [
+                "322348bbbe79bd4c"
+            ]
+        ]
+    },
+    {
+        "id": "161909f70fa16d86",
+        "type": "ui_gauge",
+        "z": "02e15995c820aa57",
+        "name": "Temperature",
+        "group": "415ff655.a1d8f8",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temperature",
+        "label": "Celsius",
+        "format": "{{value}}",
+        "min": "15",
+        "max": "45",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2190,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "6b3457b7228c741d",
+        "type": "ui_gauge",
+        "z": "02e15995c820aa57",
+        "name": "Humidity",
+        "group": "415ff655.a1d8f8",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Humidity",
+        "label": "%",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2180,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "d6c38660e8b72b4c",
+        "type": "change",
+        "z": "02e15995c820aa57",
+        "name": "Remove T and Z character",
+        "rules": [
+            {
+                "t": "change",
+                "p": "payload",
+                "pt": "msg",
+                "from": "T",
+                "fromt": "str",
+                "to": " ",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "payload",
+                "pt": "msg",
+                "from": "Z",
+                "fromt": "str",
+                "to": " ",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1600,
+        "y": 280,
+        "wires": [
+            [
+                "82933383b3debfd7"
+            ]
+        ]
+    },
+    {
+        "id": "82933383b3debfd7",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Remove millisec",
+        "func": "msg.payload = msg.payload.slice(0,-5)\nflow.set(\"time\", msg.payload)\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1840,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "edf77e86e3f559f2",
+        "type": "delay",
+        "z": "02e15995c820aa57",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 2180,
+        "y": 220,
+        "wires": [
+            [
+                "aa352a6f98ec4911"
+            ]
+        ]
+    },
+    {
+        "id": "6fe43e50af225dad",
+        "type": "http request",
+        "z": "02e15995c820aa57",
+        "name": "Send request for generate new sheet",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2090,
+        "y": 460,
+        "wires": [
+            [
+                "fb51013f7a1a5d82"
+            ]
+        ]
+    },
+    {
+        "id": "e33250564afcecd6",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Name new sheet with timestamp",
+        "func": "var year = msg.payload.years\nvar month = msg.payload.months\nvar date = msg.payload.date\nvar sheetName \nsheetName = year + \"/\" + month + \"/\" + date\nflow.set(\"currentSheet\", sheetName)\nmsg.url = \"<Your API URL>?sheetname=\" + sheetName\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1750,
+        "y": 460,
+        "wires": [
+            [
+                "6fe43e50af225dad"
+            ]
+        ]
+    },
+    {
+        "id": "f473fe75769e73d7",
+        "type": "moment",
+        "z": "02e15995c820aa57",
+        "name": "",
+        "topic": "",
+        "input": "",
+        "inputType": "msg",
+        "inTz": "Asia/Bangkok",
+        "adjAmount": "1",
+        "adjType": "months",
+        "adjDir": "add",
+        "format": "object",
+        "locale": "en-GB",
+        "output": "",
+        "outputType": "msg",
+        "outTz": "Asia/Bangkok",
+        "x": 1440,
+        "y": 460,
+        "wires": [
+            [
+                "e33250564afcecd6"
+            ]
+        ]
+    },
+    {
+        "id": "0fa348473f723462",
+        "type": "inject",
+        "z": "02e15995c820aa57",
+        "name": "Create new sheet everyday at 0.00",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "00 00 * * *",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1110,
+        "y": 460,
+        "wires": [
+            [
+                "f473fe75769e73d7"
+            ]
+        ]
+    },
+    {
+        "id": "63a51ae6477b7a2c",
+        "type": "inject",
+        "z": "02e15995c820aa57",
+        "name": "Always start with On",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 1040,
+        "y": 80,
+        "wires": [
+            [
+                "0e3b25143985995f"
+            ]
+        ]
+    },
+    {
+        "id": "63d2ffe138d95563",
+        "type": "line_notify_api",
+        "z": "02e15995c820aa57",
+        "name": "Line Notify",
+        "accessToken": "",
+        "stickerPackageId": "",
+        "stickerId": "",
+        "x": 2050,
+        "y": 760,
+        "wires": [
+            []
+        ],
+        "info": "Token : M1WyBGEYHEuleNj439PZV0YL16r5BZe6eSvgmSum8cC"
+    },
+    {
+        "id": "ae239519c901d99c",
+        "type": "ui_slider",
+        "z": "02e15995c820aa57",
+        "name": "maximum temperature slider",
+        "label": "Maximum",
+        "tooltip": "maximum temperature",
+        "group": "68a6bdc3bb28d4ec",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "20",
+        "max": "40",
+        "step": 1,
+        "className": "",
+        "x": 1540,
+        "y": 640,
+        "wires": [
+            [
+                "961f48092ad1f265"
+            ]
+        ]
+    },
+    {
+        "id": "82f59350be77b3b3",
+        "type": "ui_slider",
+        "z": "02e15995c820aa57",
+        "name": "minimum temperature slider",
+        "label": "Minimum",
+        "tooltip": "minimum temperature",
+        "group": "68a6bdc3bb28d4ec",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "20",
+        "max": "40",
+        "step": 1,
+        "className": "",
+        "x": 1540,
+        "y": 680,
+        "wires": [
+            [
+                "446b8b71ac461a08"
+            ]
+        ]
+    },
+    {
+        "id": "f64f62ede07838ea",
+        "type": "inject",
+        "z": "02e15995c820aa57",
+        "name": "Default maximum temperature (28°C)",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "28",
+        "payloadType": "num",
+        "x": 1210,
+        "y": 640,
+        "wires": [
+            [
+                "ae239519c901d99c"
+            ]
+        ]
+    },
+    {
+        "id": "3d1167e7121ca860",
+        "type": "inject",
+        "z": "02e15995c820aa57",
+        "name": "Default minimum temperature (23°C)",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "23",
+        "payloadType": "num",
+        "x": 1210,
+        "y": 680,
+        "wires": [
+            [
+                "82f59350be77b3b3"
+            ]
+        ]
+    },
+    {
+        "id": "961f48092ad1f265",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Set maximum temperature",
+        "func": "flow.set(\"maxtemp\",msg.payload)",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1840,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "446b8b71ac461a08",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Set minimum temperature",
+        "func": "flow.set(\"mintemp\", msg.payload)",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1830,
+        "y": 680,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c3f7c1cbf64f7296",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Check current temperature with threshold",
+        "func": "var max_temp = flow.get(\"maxtemp\")\nvar min_temp = flow.get(\"mintemp\")\nvar current_temp = msg.payload\nif (current_temp > max_temp){\n    msg.payload = \"อุณหภูมิของระบบสูงเกินที่กำหนด (กำหนดไว้ \" + max_temp + \"°C ปัจจุบัน \" + current_temp + \"°C)\"\n    msg.stickerPackageId = 11537\n    msg.stickerId = 52002767\n    return [msg, null, null];\n}\nif (current_temp < min_temp){\n    msg.payload = \"อุณหภูมิของระบบต่ำเกินที่กำหนด (กำหนดไว้ \" + min_temp + \"°C ปัจจุบัน \" + current_temp + \"°C)\"\n    msg.stickerPackageId = 11537\n    msg.stickerId = 52002764\n    return [null, msg, null];\n}\nif (current_temp >= min_temp && current_temp <= max_temp) {\n    msg.payload = \"อุณหภูมิของระบบกลับสู่สภาวะปกติ (กำหนดไว้สูงสุด \" + max_temp + \"°C ต่ำสุด \" + min_temp + \"°C ปัจจุบัน \" + current_temp + \"°C)\"\n    msg.stickerPackageId = 11537\n    msg.stickerId = 52002735\n    return [null, null, msg];\n}\n",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 760,
+        "wires": [
+            [
+                "6ef2a3dae13eb156",
+                "0fd8b27084c6c2de"
+            ],
+            [
+                "6ef2a3dae13eb156",
+                "0fd8b27084c6c2de"
+            ],
+            [
+                "f4e1ee6a9ecb63ab"
+            ]
+        ]
+    },
+    {
+        "id": "f4e1ee6a9ecb63ab",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Control data flow",
+        "func": "if (msg.topic === \"gate\") {\n    context.pass = (msg.payload === true) ? true : false;\n    return null;  // exit out early as it's just the control\n}\nif (context.pass) {\n    return msg; // if enabled pass msg\n}\nreturn null; // or drop it",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1730,
+        "y": 860,
+        "wires": [
+            [
+                "407f51b5249f1144",
+                "63d2ffe138d95563"
+            ]
+        ]
+    },
+    {
+        "id": "407f51b5249f1144",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Off",
+        "func": "msg.payload = false\nmsg.topic = \"gate\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1730,
+        "y": 940,
+        "wires": [
+            [
+                "f4e1ee6a9ecb63ab"
+            ]
+        ]
+    },
+    {
+        "id": "6ef2a3dae13eb156",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "On",
+        "func": "msg.payload = true\nmsg.topic = \"gate\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1690,
+        "y": 820,
+        "wires": [
+            [
+                "f4e1ee6a9ecb63ab"
+            ]
+        ]
+    },
+    {
+        "id": "0fd8b27084c6c2de",
+        "type": "delay",
+        "z": "02e15995c820aa57",
+        "name": "",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "minute",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1710,
+        "y": 760,
+        "wires": [
+            [
+                "63d2ffe138d95563"
+            ]
+        ]
+    },
+    {
+        "id": "bdb6bb76edec3f01",
+        "type": "inject",
+        "z": "02e15995c820aa57",
+        "name": "System start announcement",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "stickerPackageId",
+                "v": "11537",
+                "vt": "str"
+            },
+            {
+                "p": "stickerId",
+                "v": "52002734",
+                "vt": "str"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "ระบบมอนิเตอร์เริ่มต้นการทำงานใหม่",
+        "payloadType": "str",
+        "x": 1160,
+        "y": 820,
+        "wires": [
+            [
+                "63d2ffe138d95563"
+            ]
+        ]
+    },
+    {
+        "id": "1ce49a978b483f93",
+        "type": "function",
+        "z": "02e15995c820aa57",
+        "name": "Set sheet name every re-deploy node-red",
+        "func": "var year = msg.payload.years\nvar month = msg.payload.months\nvar date = msg.payload.date\nvar sheetName \nsheetName = year + \"/\" + month + \"/\" + date\nflow.set(\"currentSheet\", sheetName)\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1780,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8ec008d0f0142450",
+        "type": "moment",
+        "z": "02e15995c820aa57",
+        "name": "",
+        "topic": "",
+        "input": "",
+        "inputType": "msg",
+        "inTz": "Asia/Bangkok",
+        "adjAmount": "1",
+        "adjType": "months",
+        "adjDir": "add",
+        "format": "object",
+        "locale": "en-GB",
+        "output": "",
+        "outputType": "msg",
+        "outTz": "Asia/Bangkok",
+        "x": 1440,
+        "y": 420,
+        "wires": [
+            [
+                "1ce49a978b483f93"
+            ]
+        ]
+    },
+    {
+        "id": "bb35f2d7710d5646",
+        "type": "inject",
+        "z": "02e15995c820aa57",
+        "name": "Set sheet name every re-deploy node-red",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1120,
+        "y": 420,
+        "wires": [
+            [
+                "8ec008d0f0142450"
+            ]
+        ]
+    },
+    {
+        "id": "7d68187766f6889e",
+        "type": "comment",
+        "z": "02e15995c820aa57",
+        "name": "Line Notify",
+        "info": "",
+        "x": 1520,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "5d239ddcdb28af19",
+        "type": "comment",
+        "z": "02e15995c820aa57",
+        "name": "Read data from RS485 sensor",
+        "info": "",
+        "x": 1580,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "50a31a6215e8cecb",
+        "type": "comment",
+        "z": "02e15995c820aa57",
+        "name": "Google Sheet",
+        "info": "",
+        "x": 1530,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "fb51013f7a1a5d82",
+        "type": "debug",
+        "z": "02e15995c820aa57",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2380,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "0148d8e1bbb84091",
+        "type": "modbus-client",
+        "name": "RS485 Temp & Humidity",
+        "clienttype": "simpleser",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": false,
+        "tcpHost": "127.0.0.1",
+        "tcpPort": "502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyACM0",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": false,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "68a6bdc3bb28d4ec",
+        "type": "ui_group",
+        "name": "Setting",
+        "tab": "622a3108.4411e",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "415ff655.a1d8f8",
+        "type": "ui_group",
+        "name": "Monitor",
+        "tab": "622a3108.4411e",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "622a3108.4411e",
+        "type": "ui_tab",
+        "name": "Industrial",
+        "icon": "fa-industry",
+        "disabled": false,
+        "hidden": false
+    }
+]
